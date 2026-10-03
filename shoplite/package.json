@@ -1,0 +1,23 @@
+{
+  "name": "shoplite",
+  "private": true,
+  "description": "Training repo for the AI-Assisted Coding series (Claude Code + Cursor). Contains deliberate bugs.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "workspaces": [
+    "api",
+    "web"
+  ],
+  "scripts": {
+    "setup": "node --disable-warning=ExperimentalWarning scripts/setup.ts",
+    "dev": "node scripts/dev.ts",
+    "dev:api": "npm run dev -w api",
+    "dev:web": "npm run dev -w web",
+    "test": "npm test -w api && npm test -w web",
+    "test:api": "npm test -w api",
+    "test:web": "npm test -w web",
+    "typecheck": "npm run typecheck -w api && npm run typecheck -w web"
+  }
+}
