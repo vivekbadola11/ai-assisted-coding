@@ -25,6 +25,14 @@ If the code and this page disagree, the code is wrong (raise a ticket).
   (Product decision, March 2026. Do not change without Product sign-off.)
 - Below ₹999, shipping is a flat **₹49**.
 
+## Minimum order value
+
+- Orders below **₹299** can't be checked out (SHOP-113, agreed with Finance).
+- The minimum is measured on what the customer pays for the goods:
+  **subtotal minus coupon discount**, before GST and shipping.
+- An order of exactly ₹299 is allowed.
+- The cart shows `minimumOrderShortfall`, the rupees still missing (0 when met).
+
 ## Rounding
 
 - Every money value (subtotal, discount, tax, shipping, total) is rounded to

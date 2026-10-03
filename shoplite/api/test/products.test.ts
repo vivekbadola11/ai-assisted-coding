@@ -45,4 +45,46 @@ describe('products API', () => {
     const res = await server.request('GET', '/api/products?page=abc');
     assert.equal(res.status, 400);
   });
+
+  it('SHOP-105: page numbers show every active product exactly once', async () => {
+    const seen: number[] = [];
+    for (let page = 1; page <= 3; page++) {
+      const res = await server.request('GET', `/api/products?page=${page}&pageSize=10`);
+      assert.equal(res.status, 200);
+      seen.push(...res.body.items.map((p: { id: number }) => p.id));
+    }
+    assert.equal(seen.length, 28);
+    assert.equal(new Set(seen).size, 28);
+  });
+
+  it('SHOP-105: the cursor feed walks every active product exactly once', async () => {
+    const seen: number[] = [];
+    let cursor: string | null = null;
+    do {
+      const query: string = cursor ? `&cursor=${cursor}` : '';
+      const res = await server.request('GET', `/api/products/feed?limit=8${query}`);
+      assert.equal(res.status, 200);
+      seen.push(...res.body.items.map((p: { id: number }) => p.id));
+      cursor = res.body.nextCursor;
+    } while (cursor);
+    assert.equal(seen.length, 28);
+    assert.equal(new Set(seen).size, 28);
+  });
+
+  it('SHOP-105: a product added mid-scroll does not shift the cursor feed', async () => {
+    const first = await server.request('GET', '/api/products/feed?limit=5');
+    server.db
+      .prepare(
+        "INSERT INTO products (sku, name, category_id, price, stock, active, created_at) VALUES ('T-NEW', 'Brand New Product', 2, 999, 5, 1, '2026-12-31T00:00:00.000Z')",
+      )
+      .run();
+    const second = await server.request('GET', `/api/products/feed?limit=5&cursor=${first.body.nextCursor}`);
+    const firstIds = new Set(first.body.items.map((p: { id: number }) => p.id));
+    assert.ok(second.body.items.every((p: { id: number }) => !firstIds.has(p.id)));
+  });
+
+  it('rejects a tampered cursor', async () => {
+    const res = await server.request('GET', '/api/products/feed?cursor=not-a-cursor');
+    assert.equal(res.status, 400);
+  });
 });

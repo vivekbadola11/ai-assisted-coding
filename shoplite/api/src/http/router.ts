@@ -60,6 +60,10 @@ export class Router<D> {
     return this.add('POST', path, handler);
   }
 
+  put(path: string, handler: Handler<D>): this {
+    return this.add('PUT', path, handler);
+  }
+
   patch(path: string, handler: Handler<D>): this {
     return this.add('PATCH', path, handler);
   }

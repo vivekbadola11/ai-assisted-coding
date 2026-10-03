@@ -47,4 +47,28 @@ describe('pricing', () => {
     assert.equal(roundMoney(totals.tax), 62.82);
     assert.equal(roundMoney(totals.total), 460.82);
   });
+
+  it('SHOP-101: charges GST on the discounted subtotal (worked example)', () => {
+    const totals = calculateTotals([{ unitPrice: 499, quantity: 2 }], SAVE10, config);
+    assert.deepEqual(totals, {
+      subtotal: 998,
+      discount: 99.8,
+      tax: 161.68,
+      shipping: 49,
+      total: 1108.88,
+    });
+  });
+
+  it('SHOP-101: every amount is rounded to paise', () => {
+    const totals = calculateTotals([{ unitPrice: 249.5, quantity: 3 }], SAVE10, config);
+    for (const value of Object.values(totals)) {
+      assert.equal(value, roundMoney(value));
+    }
+    assert.equal(totals.total, roundMoney(totals.subtotal - totals.discount + totals.tax + totals.shipping));
+  });
+
+  it('SHOP-104: ships free at exactly the threshold', () => {
+    const totals = calculateTotals([{ unitPrice: 999, quantity: 1 }], null, config);
+    assert.equal(totals.shipping, 0);
+  });
 });

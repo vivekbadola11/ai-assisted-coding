@@ -29,6 +29,8 @@ export interface Config {
   freeShippingThreshold: number;
   /** Flat shipping fee (₹) below the threshold */
   shippingFee: number;
+  /** Smallest order (₹) we accept, measured on subtotal minus coupon discount. SHOP-113 */
+  minimumOrderValue: number;
 }
 
 export const config: Config = {
@@ -39,4 +41,5 @@ export const config: Config = {
   taxRate: Number(required('TAX_RATE')),
   freeShippingThreshold: 999,
   shippingFee: 49,
+  minimumOrderValue: 299,
 };

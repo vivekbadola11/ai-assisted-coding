@@ -47,6 +47,17 @@ describe('carts API', () => {
     assert.equal(expired.status, 404);
   });
 
+  it('reports how far the cart is below the minimum order value', async () => {
+    const cart = (await server.request('POST', '/api/carts')).body;
+    assert.equal(cart.minimumOrderShortfall, 299);
+
+    const mug = await server.request('POST', `/api/carts/${cart.id}/items`, { productId: 4 }); // ₹249.50
+    assert.equal(mug.body.minimumOrderShortfall, 49.5);
+
+    const more = await server.request('POST', `/api/carts/${cart.id}/items`, { productId: 4 }); // ₹499
+    assert.equal(more.body.minimumOrderShortfall, 0);
+  });
+
   it('removes an item', async () => {
     const cart = (await server.request('POST', '/api/carts')).body;
     await server.request('POST', `/api/carts/${cart.id}/items`, { productId: 4 });

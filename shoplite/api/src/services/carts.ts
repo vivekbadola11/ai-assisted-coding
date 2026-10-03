@@ -1,6 +1,7 @@
 import type { Config } from '../config.ts';
 import type { DB } from '../db/connection.ts';
 import { HttpError } from '../http/router.ts';
+import { roundMoney } from '../lib/money.ts';
 import { calculateTotals, type Coupon, type Totals } from './pricing.ts';
 
 export interface CartLineDto {
@@ -17,6 +18,8 @@ export interface CartDto {
   status: 'open' | 'checked_out';
   items: CartLineDto[];
   totals: Totals;
+  /** Rupees still needed to reach the minimum order value; 0 once it is met. */
+  minimumOrderShortfall: number;
 }
 
 interface CartRow {
@@ -73,16 +76,31 @@ export function loadCartLines(db: DB, cartId: number): CartLineDto[] {
   }));
 }
 
+/**
+ * How far an order is below the minimum order value (SHOP-113). The minimum is
+ * measured on what the customer pays for the goods: subtotal minus coupon
+ * discount, before GST and shipping. Returns 0 when the minimum is met.
+ */
+export function minimumOrderShortfall(
+  totals: Pick<Totals, 'subtotal' | 'discount'>,
+  config: Pick<Config, 'minimumOrderValue'>,
+): number {
+  const goods = totals.subtotal - totals.discount;
+  return Math.max(0, roundMoney(config.minimumOrderValue - goods));
+}
+
 export function loadCartDto(db: DB, cartId: number, config: Config): CartDto {
   const cart = getCartRow(db, cartId);
   const items = loadCartLines(db, cartId);
   const coupon = cart.coupon_code ? findActiveCoupon(db, cart.coupon_code) : null;
+  const totals = calculateTotals(items, coupon, config);
   return {
     id: cart.id,
     customerId: cart.customer_id,
     couponCode: cart.coupon_code,
     status: cart.status,
     items,
-    totals: calculateTotals(items, coupon, config),
+    totals,
+    minimumOrderShortfall: minimumOrderShortfall(totals, config),
   };
 }

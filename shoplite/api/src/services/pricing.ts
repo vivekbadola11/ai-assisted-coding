@@ -2,6 +2,7 @@
  * Cart and order pricing. Business rules live in docs/business-rules.md.
  */
 import type { Config } from '../config.ts';
+import { roundMoney } from '../lib/money.ts';
 
 export interface PricedItem {
   unitPrice: number;
@@ -36,15 +37,20 @@ export function calculateDiscount(subtotal: number, coupon: Coupon | null): numb
   return Math.min(coupon.value, subtotal);
 }
 
+/** Free at or above the threshold, based on the subtotal before discount. */
 export function calculateShipping(subtotal: number, config: PricingConfig): number {
-  return subtotal > config.freeShippingThreshold ? 0 : config.shippingFee;
+  return subtotal >= config.freeShippingThreshold ? 0 : config.shippingFee;
 }
 
+/**
+ * Price a cart. GST is charged on the subtotal after the coupon discount, and
+ * every amount is rounded to paise so the parts always add up to the total.
+ */
 export function calculateTotals(items: PricedItem[], coupon: Coupon | null, config: PricingConfig): Totals {
-  const subtotal = calculateSubtotal(items);
-  const discount = calculateDiscount(subtotal, coupon);
-  const tax = subtotal * config.taxRate;
-  const shipping = calculateShipping(subtotal, config);
-  const total = subtotal - discount + tax + shipping;
+  const subtotal = roundMoney(calculateSubtotal(items));
+  const discount = roundMoney(calculateDiscount(subtotal, coupon));
+  const tax = roundMoney((subtotal - discount) * config.taxRate);
+  const shipping = roundMoney(calculateShipping(subtotal, config));
+  const total = roundMoney(subtotal - discount + tax + shipping);
   return { subtotal, discount, tax, shipping, total };
 }

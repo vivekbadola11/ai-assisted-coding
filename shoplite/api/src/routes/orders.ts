@@ -2,7 +2,7 @@ import type { Deps } from '../app.ts';
 import { HttpError, type Router } from '../http/router.ts';
 import { asObject, positiveInt } from '../http/validate.ts';
 import { charge } from '../integrations/payments.ts';
-import { findActiveCoupon, getOpenCartRow } from '../services/carts.ts';
+import { findActiveCoupon, getOpenCartRow, minimumOrderShortfall } from '../services/carts.ts';
 import { reserveStock } from '../services/inventory.ts';
 import { calculateTotals } from '../services/pricing.ts';
 
@@ -61,12 +61,18 @@ export function registerOrderRoutes(router: Router<Deps>): void {
       unitPrice: productById.get(line.product_id)!.price,
     }));
 
+    const coupon = cart.coupon_code ? findActiveCoupon(db, cart.coupon_code) : null;
+    const totals = calculateTotals(items, coupon, config);
+
+    // SHOP-113: checked before any stock is reserved, so a refused checkout changes nothing.
+    if (minimumOrderShortfall(totals, config) > 0) {
+      throw new HttpError(400, `Minimum order value is ₹${config.minimumOrderValue}`);
+    }
+
     for (const item of items) {
       reserveStock(db, item.productId, item.quantity);
     }
 
-    const coupon = cart.coupon_code ? findActiveCoupon(db, cart.coupon_code) : null;
-    const totals = calculateTotals(items, coupon, config);
     const payment = await charge(totals.total, config.paymentApiKey);
 
     const result = db

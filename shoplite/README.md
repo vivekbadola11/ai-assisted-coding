@@ -43,7 +43,7 @@ so the agent can't read the expected answers. Git tags mark where each lab start
 |---|---|
 | `t1-start` | Fresh project (this is `main`) |
 | `t1-end` / `t2-start` | After Topic 1: project context files (`AGENTS.md`, `CLAUDE.md`), `TAX_RATE` fixed |
-| `t2-end` | After Topic 2: SHOP-101, 104 and 105 fixed, SHOP-103 investigation, SHOP-102 plan and API |
+| `t2-end` | After Topic 2: SHOP-113 minimum order value, SHOP-101, 104 and 105 fixed, SHOP-103 investigation, SHOP-102 plan and API |
 
 Jump to a checkpoint on a new branch so you can play freely:
 

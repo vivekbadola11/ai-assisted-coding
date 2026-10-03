@@ -7,6 +7,7 @@ import { registerAdminRoutes } from './routes/admin.ts';
 import { registerCartRoutes } from './routes/carts.ts';
 import { registerOrderRoutes } from './routes/orders.ts';
 import { registerProductRoutes } from './routes/products.ts';
+import { registerWishlistRoutes } from './routes/wishlist.ts';
 
 const SLOW_REQUEST_MS = 500;
 
@@ -22,6 +23,7 @@ export function buildRouter(): Router<Deps> {
   registerProductRoutes(router);
   registerCartRoutes(router);
   registerOrderRoutes(router);
+  registerWishlistRoutes(router);
   registerAdminRoutes(router);
   return router;
 }
