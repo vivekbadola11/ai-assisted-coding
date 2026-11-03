@@ -10,7 +10,7 @@ that the agent mustn't read. Run them from inside `shoplite/` as `../labs/...`.
 | # | Topic | Tools | Starts at | Uses |
 |---|---|---|---|---|
 | 1 | [Installation, setup & daily use](01-setup/) | Claude Code + Cursor | `t1-start` | `.env`, `/init`, basic commands |
-| 2 | [Prompt engineering](02-prompting/) | Claude Code | `t2-start` | SHOP-113, SHOP-101 … 105, 112 |
+| 2 | [Prompt engineering](02-prompting/) | Claude Code | `t2-start` | SHOP-113, SHOP-103, SHOP-102 |
 | 3 | [Skills and rules](03-skills-rules/) | Both | `t3-start`* | SHOP-100, SHOP-111, `docs/design-system.md` |
 | 4 | [MCPs and plugins](04-mcp/) | Both | `t4-start`* | SQLite DB, tickets |
 | 5 | [Token optimisation & context](05-context/) | Both | `t5-start`* | SHOP-106, `logs/app.log` |
